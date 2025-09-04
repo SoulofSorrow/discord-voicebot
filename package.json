@@ -1,0 +1,54 @@
+{
+  "name": "tempvoice",
+  "version": "2.0.0",
+  "description": "A dynamic voice channel solution for Discord — temporary, controllable, and multilingual.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test test/**/*.test.js",
+    "security": "npm audit",
+    "build": "echo 'No build step required'",
+    "docker:build": "docker build -t tempvoice .",
+    "docker:run": "docker run --env-file .env tempvoice",
+    "deps:update": "npx npm-check-updates -u",
+    "deps:check": "npm outdated"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "voice",
+    "temporary",
+    "channels",
+    "multilingual"
+  ],
+  "author": "SoulofSorrow",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SoulofSorrow/tempvoice-v2"
+  },
+  "bugs": {
+    "url": "https://github.com/SoulofSorrow/tempvoice-v2/issues"
+  },
+  "homepage": "https://github.com/SoulofSorrow/tempvoice-v2#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.31.0",
+    "nodemon": "^3.0.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.3"
+  }
+}

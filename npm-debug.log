@@ -1,0 +1,30 @@
+npm verbose cli /opt/homebrew/Cellar/node/24.7.0/bin/node /opt/homebrew/bin/npm
+npm info using npm@11.5.1
+npm info using node@v24.7.0
+npm warn config production Use `--omit=dev` instead.
+npm verbose title npm install
+npm verbose argv "install" "--production" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:/Users/jus/.npm/_logs/2025-09-04T08_15_30_783Z-
+npm verbose logfile /Users/jus/.npm/_logs/2025-09-04T08_15_30_783Z-debug-0.log
+npm http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 393ms
+
+> tempvoice@2.0.0 postinstall
+> node scripts/postinstall.js
+
+🛠️  Post-Install Setup...
+💡 Optional dependencies missing (for better performance):
+   npm install bufferutil utf-8-validate
+✅ Post-install setup completed
+
+up to date, audited 156 packages in 561ms
+
+20 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm verbose cwd /Users/jus/code/tempvoice-v2
+npm verbose os Darwin 24.6.0
+npm verbose node v24.7.0
+npm verbose npm  v11.5.1
+npm verbose exit 0
+npm info ok
