@@ -1,4 +1,17 @@
+/**
+ * Input sanitization service
+ * Removes dangerous characters and prevents injection attacks
+ *
+ * @class Sanitizer
+ */
 export class Sanitizer {
+  /**
+   * Sanitize channel name for Discord
+   * @param {string} name - Channel name to sanitize
+   * @returns {string} Sanitized channel name
+   * @example
+   * Sanitizer.sanitizeChannelName('Test<script>') // 'Testscript'
+   */
   static sanitizeChannelName(name) {
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return 'Unnamed Channel';
