@@ -110,7 +110,7 @@ async function loadModals(client) {
 }
 
 async function setupEventHandlers(client) {
-  client.once('ready', async () => {
+  client.once('clientReady', async () => {
     const { default: handleReady } = await import('../events/ready.js');
     await handleReady(client);
   });
