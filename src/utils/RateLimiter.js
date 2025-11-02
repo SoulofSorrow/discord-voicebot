@@ -26,6 +26,18 @@ class RateLimiter {
   }
 
   /**
+   * Alias for checkUserLimit for backwards compatibility
+   * @param {string} userId - Discord user ID
+   * @param {string} action - Action type
+   * @param {number} maxAttempts - Maximum attempts allowed
+   * @param {number} window - Time window in ms
+   * @returns {Object} Rate limit result
+   */
+  checkLimit(userId, action, maxAttempts = 10, window = 60000) {
+    return this.checkUserLimit(userId, action, maxAttempts, window);
+  }
+
+  /**
    * Check channel-specific rate limit
    * @param {string} channelId - Discord channel ID
    * @param {string} action - Action type
