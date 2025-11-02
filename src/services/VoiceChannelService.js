@@ -5,6 +5,7 @@ import { OwnershipManager } from '../utils/OwnershipManager.js';
 import { metrics } from '../utils/MetricsCollector.js';
 import { log } from '../utils/logger.js';
 import t from '../utils/t.js';
+import monitoringService from './MonitoringService.js';
 
 export class VoiceChannelService {
   constructor(client) {
@@ -34,15 +35,17 @@ export class VoiceChannelService {
           }
         ]
       });
-      
-      this.client.tempVoiceOwners.set(channel.id, member.id);
+
+      // Register ownership (memory + database)
+      OwnershipManager.register(this.client, channel.id, member.id, guild.id);
       metrics.increment('channelsCreated');
-      
+      monitoringService.recordChannelCreated();
+
       log('log_joined', this.client, {
         user: member.user.username,
         channel: channel.name
       });
-      
+
       return channel;
     } catch (error) {
       await ErrorHandler.handle(error, null, this.client, 'createTempChannel');
@@ -64,6 +67,7 @@ export class VoiceChannelService {
       OwnershipManager.cleanup(this.client, channel.id);
       this.client.deletedByInteraction?.delete(channel.id);
       metrics.increment('channelsDeleted');
+      monitoringService.recordChannelDeleted();
       
     } catch (err) {
       if (err.code === 10003) { // Unknown Channel

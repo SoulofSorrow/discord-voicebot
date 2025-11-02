@@ -1,6 +1,7 @@
 import { ValidationService } from './ValidationService.js';
 import { metrics } from './MetricsCollector.js';
 import { cache } from './CacheManager.js';
+import databaseService from '../services/DatabaseService.js';
 
 export class OwnershipManager {
   static check(client, channelId, userId) {
@@ -8,7 +9,21 @@ export class OwnershipManager {
       return false;
     }
 
-    return client.tempVoiceOwners.get(channelId) === userId;
+    // Check in-memory first (faster)
+    const memoryOwner = client.tempVoiceOwners.get(channelId);
+    if (memoryOwner) {
+      return memoryOwner === userId;
+    }
+
+    // Fallback to database if not in memory
+    const dbChannel = databaseService.getChannel(channelId);
+    if (dbChannel) {
+      // Restore to memory for faster subsequent lookups
+      client.tempVoiceOwners.set(channelId, dbChannel.ownerId);
+      return dbChannel.ownerId === userId;
+    }
+
+    return false;
   }
 
   static async transfer(client, channelId, newOwnerId) {
@@ -17,12 +32,12 @@ export class OwnershipManager {
     }
 
     const oldOwnerId = client.tempVoiceOwners.get(channelId);
+
+    // Update in memory
     client.tempVoiceOwners.set(channelId, newOwnerId);
 
-    // Optional: Persist to database
-    if (client.database) {
-      await client.database.updateOwner(channelId, newOwnerId);
-    }
+    // Persist to database
+    databaseService.updateChannelOwner(channelId, newOwnerId);
 
     metrics.recordInteraction('transfer');
     return { oldOwnerId, newOwnerId };
@@ -37,12 +52,11 @@ export class OwnershipManager {
 
   static cleanup(client, channelId) {
     if (client?.tempVoiceOwners?.has(channelId)) {
+      // Remove from memory
       client.tempVoiceOwners.delete(channelId);
 
-      // Optional: Cleanup from database
-      if (client.database) {
-        client.database.removeChannel(channelId).catch(console.error);
-      }
+      // Remove from database
+      databaseService.deleteChannel(channelId);
 
       // Clear cache
       cache.cache.forEach((_, key) => {
@@ -51,5 +65,13 @@ export class OwnershipManager {
         }
       });
     }
+  }
+
+  static register(client, channelId, ownerId, guildId) {
+    // Register in memory
+    client.tempVoiceOwners.set(channelId, ownerId);
+
+    // Persist to database
+    databaseService.saveChannel(channelId, guildId, ownerId);
   }
 }

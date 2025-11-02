@@ -6,12 +6,18 @@ import { ErrorHandler } from '../utils/ErrorHandler.js';
 import { cache } from '../utils/CacheManager.js';
 import { metrics } from '../utils/MetricsCollector.js';
 import { logStartup } from '../utils/logger.js';
+import databaseService from '../services/DatabaseService.js';
+import monitoringService from '../services/MonitoringService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default async function initializeBot(client) {
   try {
+    // Initialize database first
+    databaseService.initialize();
+    logStartup('📦 Database initialized');
+
     // Initialize collections
     client.activeInteractions = new Set();
     client.modals = new Collection();
@@ -21,6 +27,11 @@ export default async function initializeBot(client) {
     // Add utility references
     client.cache = cache;
     client.metrics = metrics;
+    client.database = databaseService;
+    client.monitoring = monitoringService;
+
+    // Restore channel ownership from database
+    restoreChannelOwnership(client);
 
     // Load modals
     await loadModals(client);
@@ -31,11 +42,28 @@ export default async function initializeBot(client) {
     // Setup periodic cleanup
     setupPeriodicCleanup(client);
 
+    // Start monitoring server
+    monitoringService.start(client);
+
     logStartup('🔧 Bot initialization completed');
 
   } catch (error) {
     await ErrorHandler.handle(error, null, client, 'initializeBot');
     throw error;
+  }
+}
+
+function restoreChannelOwnership(client) {
+  try {
+    const channels = databaseService.db.prepare('SELECT channel_id, owner_id FROM channels').all();
+
+    for (const { channel_id, owner_id } of channels) {
+      client.tempVoiceOwners.set(channel_id, owner_id);
+    }
+
+    logStartup(`   ✓ Restored ${channels.length} channel ownerships from database`);
+  } catch (error) {
+    logStartup(`   ⚠  Failed to restore channel ownership: ${error.message}`);
   }
 }
 
@@ -145,6 +173,9 @@ function setupPeriodicCleanup(client) {
       // Cache cleanup
       client.cache?.cleanup?.();
 
+      // Database metrics cleanup (30 days old)
+      databaseService.cleanupOldMetrics();
+
       logStartup('🧹 Performed periodic cleanup');
     } catch (error) {
       console.error('Cleanup error:', error);
@@ -154,5 +185,24 @@ function setupPeriodicCleanup(client) {
   // Clear interval on process exit
   process.on('exit', () => {
     clearInterval(cleanupInterval);
+    databaseService.close();
+    monitoringService.stop();
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    logStartup('🛑 Received SIGTERM, shutting down gracefully...');
+    clearInterval(cleanupInterval);
+    databaseService.close();
+    monitoringService.stop();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', () => {
+    logStartup('🛑 Received SIGINT, shutting down gracefully...');
+    clearInterval(cleanupInterval);
+    databaseService.close();
+    monitoringService.stop();
+    process.exit(0);
   });
 }

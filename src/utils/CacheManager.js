@@ -55,6 +55,30 @@ class CacheManager {
   clear() {
     this.cache.clear();
   }
+
+  has(key) {
+    return this.cache.has(key) && this.get(key) !== null;
+  }
+
+  delete(key) {
+    this.cache.delete(key);
+  }
+
+  size() {
+    return this.cache.size;
+  }
+
+  getOrSet(key, factory) {
+    const cached = this.get(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    const value = factory();
+    this.set(key, value);
+    return value;
+  }
 }
 
+export { CacheManager };
 export const cache = new CacheManager();
