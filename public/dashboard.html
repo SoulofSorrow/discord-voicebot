@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TempVoice Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎙️ TempVoice Dashboard</h1>
+                <div class="header-right">
+                    <span class="status-indicator" id="status">
+                        <span class="dot"></span>
+                        <span class="text">Connecting...</span>
+                    </span>
+                    <select id="timeRange" class="time-selector">
+                        <option value="3600000">Last Hour</option>
+                        <option value="86400000" selected>Last 24 Hours</option>
+                        <option value="604800000">Last 7 Days</option>
+                        <option value="2592000000">Last 30 Days</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-label">Active Channels</div>
+                    <div class="stat-value" id="activeChannels">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Created</div>
+                    <div class="stat-value" id="totalChannels">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <div class="stat-label">Top Creator</div>
+                    <div class="stat-value small" id="topCreator">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-label">Interactions</div>
+                    <div class="stat-value" id="totalInteractions">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💾</div>
+                <div class="stat-content">
+                    <div class="stat-label">Cache Hit Rate</div>
+                    <div class="stat-value" id="cacheHitRate">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🚦</div>
+                <div class="stat-content">
+                    <div class="stat-label">Rate Limits</div>
+                    <div class="stat-value" id="rateLimits">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-content">
+                    <div class="stat-label">Uptime</div>
+                    <div class="stat-value small" id="uptime">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💾</div>
+                <div class="stat-content">
+                    <div class="stat-label">Memory Usage</div>
+                    <div class="stat-value small" id="memory">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>📈 Activity Timeline</h3>
+                    <span class="chart-subtitle">Channels Created & Deleted</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>🎯 Interaction Distribution</h3>
+                    <span class="chart-subtitle">By Type</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="interactionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="tables-grid">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>🏆 Top Channel Creators</h3>
+                </div>
+                <div class="table-container">
+                    <table id="topCreatorsTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>User ID</th>
+                                <th>Channels Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="3" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>❌ Recent Errors</h3>
+                </div>
+                <div class="table-container">
+                    <table id="errorsTable">
+                        <thead>
+                            <tr>
+                                <th>Context</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="2" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="health-section">
+            <div class="health-card">
+                <h3>🏥 System Health</h3>
+                <div class="health-grid">
+                    <div class="health-item">
+                        <span class="health-label">Bot Status</span>
+                        <span class="health-value" id="botStatus">
+                            <span class="dot"></span> Checking...
+                        </span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Database</span>
+                        <span class="health-value" id="dbStatus">
+                            <span class="dot"></span> Checking...
+                        </span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Cache Size</span>
+                        <span class="health-value" id="cacheSize">-</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">WebSocket</span>
+                        <span class="health-value" id="wsStatus">
+                            <span class="dot"></span> Connecting...
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>TempVoice v2.0 | Last Update: <span id="lastUpdate">Never</span></p>
+            <button class="export-btn" onclick="exportReport()">📥 Export Report</button>
+        </footer>
+    </div>
+
+    <script src="/dashboard.js"></script>
+</body>
+</html>

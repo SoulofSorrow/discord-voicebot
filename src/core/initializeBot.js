@@ -8,6 +8,7 @@ import { metrics } from '../utils/MetricsCollector.js';
 import { logStartup } from '../utils/logger.js';
 import databaseService from '../services/DatabaseService.js';
 import monitoringService from '../services/MonitoringService.js';
+import dashboardService from '../services/DashboardService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,11 @@ export default async function initializeBot(client) {
 
     // Start monitoring server
     monitoringService.start(client);
+
+    // Start dashboard server
+    if (process.env.ENABLE_DASHBOARD !== 'false') {
+      dashboardService.start(client);
+    }
 
     logStartup('🔧 Bot initialization completed');
 
@@ -195,6 +201,7 @@ function setupPeriodicCleanup(client) {
     clearInterval(cleanupInterval);
     databaseService.close();
     monitoringService.stop();
+    dashboardService.stop();
     process.exit(0);
   });
 
@@ -203,6 +210,7 @@ function setupPeriodicCleanup(client) {
     clearInterval(cleanupInterval);
     databaseService.close();
     monitoringService.stop();
+    dashboardService.stop();
     process.exit(0);
   });
 }
