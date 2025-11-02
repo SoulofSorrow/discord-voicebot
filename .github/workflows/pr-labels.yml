@@ -1,0 +1,101 @@
+name: PR Labels & Automation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  label:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Label based on files changed
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  size-label:
+    name: PR Size Label
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add size label
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: 10
+          s_label: 'size/s'
+          s_max_size: 50
+          m_label: 'size/m'
+          m_max_size: 200
+          l_label: 'size/l'
+          l_max_size: 500
+          xl_label: 'size/xl'
+          fail_if_xl: false
+
+  conventional-commits:
+    name: Check Conventional Commits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            ci
+          requireScope: false
+          subjectPattern: ^[A-Z].+$
+          subjectPatternError: |
+            Subject must start with a capital letter
+          wip: true
+
+  pr-comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `👋 Thanks for opening this PR!
+
+              ## 📋 Checklist
+              - [ ] Tests pass
+              - [ ] Linting passes
+              - [ ] Docker build succeeds
+              - [ ] Documentation updated (if needed)
+              - [ ] Follows conventional commits
+
+              The CI checks will run automatically. Please make sure all checks pass before requesting a review.`
+            })

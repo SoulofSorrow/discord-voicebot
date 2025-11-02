@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & Discussions
+    url: https://github.com/SoulofSorrow/discord-voicebot/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📖 Documentation
+    url: https://github.com/SoulofSorrow/discord-voicebot#readme
+    about: Read the project documentation
+  - name: 🐛 Security Issue
+    url: https://github.com/SoulofSorrow/discord-voicebot/security/advisories/new
+    about: Report a security vulnerability (private)
