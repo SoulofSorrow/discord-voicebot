@@ -53,10 +53,17 @@ class DatabaseService {
         guild_id TEXT NOT NULL,
         owner_id TEXT NOT NULL,
         created_at INTEGER NOT NULL,
-        settings TEXT DEFAULT '{}',
-        INDEX idx_guild (guild_id),
-        INDEX idx_owner (owner_id)
+        settings TEXT DEFAULT '{}'
       )
+    `);
+
+    // Create indexes for channels table
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_channels_guild ON channels(guild_id)
+    `);
+
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_channels_owner ON channels(owner_id)
     `);
 
     // Channel permissions - stores trust/block lists per channel
@@ -72,7 +79,7 @@ class DatabaseService {
       )
     `);
 
-    // Create index for faster lookups
+    // Create index for channel_permissions
     this.db.exec(`
       CREATE INDEX IF NOT EXISTS idx_channel_permissions
       ON channel_permissions(channel_id, permission_type)
@@ -84,10 +91,17 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         metric_type TEXT NOT NULL,
         metric_value TEXT NOT NULL,
-        recorded_at INTEGER NOT NULL,
-        INDEX idx_metric_type (metric_type),
-        INDEX idx_recorded_at (recorded_at)
+        recorded_at INTEGER NOT NULL
       )
+    `);
+
+    // Create indexes for metrics table
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_metrics_type ON metrics(metric_type)
+    `);
+
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_metrics_recorded_at ON metrics(recorded_at)
     `);
 
     logStartup('📋 Database tables created/verified');
