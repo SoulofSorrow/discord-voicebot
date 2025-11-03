@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, PermissionFlagBits } from 'discord.js';
+import pkg from 'discord.js';
+const { SlashCommandBuilder, PermissionFlagBits } = pkg;
 import AdminService from '../services/AdminService.js';
 import { createEmbed } from '../utils/embeds.js';
 
