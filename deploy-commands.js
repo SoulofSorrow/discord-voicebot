@@ -75,19 +75,21 @@ const rest = new REST().setToken(DISCORD_TOKEN);
     console.log('\n🎉 Command deployment complete!');
     console.log('💡 Commands should appear in Discord within a few seconds.\n');
   } catch (error) {
-    console.error('❌ Error deploying commands:', error);
+    console.error('❌ Error deploying commands:', error.message);
 
     if (error.code === 50001) {
       console.error('\n⚠️  Missing Access: The bot doesn\'t have access to the guild.');
       console.error('   Make sure the bot is invited to your server.');
+      process.exit(1);
     } else if (error.code === 10004) {
       console.error('\n⚠️  Unknown Guild: GUILD_ID is invalid.');
       console.error('   Check your GUILD_ID in the .env file.');
+      process.exit(1);
     } else if (error.code === 40060) {
-      console.error('\n⚠️  Interaction Already Registered: Commands may already exist.');
-      console.error('   This is usually fine - commands were updated.');
+      console.log('\n✅ Commands already up to date (this is fine).');
+    } else {
+      console.error('\n⚠️  Warning: Command deployment encountered an error, but continuing...');
+      console.error('   Error details:', error.code || 'Unknown');
     }
-
-    process.exit(1);
   }
 })();
