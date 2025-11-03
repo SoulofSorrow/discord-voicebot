@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -59,44 +60,44 @@ export class DashboardService {
   }
 
   /**
-   * Create rate limiting middleware for dashboard routes
+   * Setup HTTP routes
    */
-  createRateLimitMiddleware() {
-    return (req, res, next) => {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const identifier = `dashboard:${ip}`;
-
-      // Allow 30 requests per minute per IP
-      if (!rateLimiter.checkLimit(identifier, 'dashboard_access', 30, 60000)) {
-        logger.warn('Dashboard rate limit exceeded', { ip, path: req.path });
-        return res.status(429).json({
+  setupRoutes() {
+    // Create rate limiting middleware using express-rate-limit
+    // CodeQL recognizes this standard library for rate limiting
+    const limiter = rateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      max: 30, // Limit each IP to 30 requests per windowMs
+      message: {
+        error: 'Too many requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        retryAfter: 60
+      },
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+      handler: (req, res) => {
+        logger.warn('Dashboard rate limit exceeded', {
+          ip: req.ip,
+          path: req.path
+        });
+        res.status(429).json({
           error: 'Too many requests',
           message: 'Rate limit exceeded. Please try again later.',
           retryAfter: 60
         });
-      }
-
-      next();
-    };
-  }
-
-  /**
-   * Setup HTTP routes
-   */
-  setupRoutes() {
-    // Create rate limiting middleware
-    const rateLimitMiddleware = this.createRateLimitMiddleware();
+      },
+    });
 
     // Apply rate limiting to all routes
-    this.app.use(rateLimitMiddleware);
+    this.app.use(limiter);
 
     // Main dashboard page
-    this.app.get('/', rateLimitMiddleware, (req, res) => {
+    this.app.get('/', (req, res) => {
       res.sendFile(join(__dirname, '../../public/dashboard.html'));
     });
 
     // API: Dashboard overview
-    this.app.get('/api/dashboard', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/dashboard', (req, res) => {
       try {
         const timeRange = parseInt(req.query.timeRange) || 24 * 60 * 60 * 1000;
         const data = AnalyticsService.getDashboardData(this.client, { timeRange });
@@ -108,7 +109,7 @@ export class DashboardService {
     });
 
     // API: Channel statistics
-    this.app.get('/api/channels', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/channels', (req, res) => {
       try {
         const stats = AnalyticsService.getChannelStats(this.client, req.query);
         res.json(stats);
@@ -118,7 +119,7 @@ export class DashboardService {
     });
 
     // API: User statistics
-    this.app.get('/api/users', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/users', (req, res) => {
       try {
         const userId = req.query.userId;
         const stats = AnalyticsService.getUserStats(userId);
@@ -129,7 +130,7 @@ export class DashboardService {
     });
 
     // API: Performance metrics
-    this.app.get('/api/performance', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/performance', (req, res) => {
       try {
         const metrics = AnalyticsService.getPerformanceMetrics();
         res.json(metrics);
@@ -139,7 +140,7 @@ export class DashboardService {
     });
 
     // API: Activity timeline
-    this.app.get('/api/timeline', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/timeline', (req, res) => {
       try {
         const timeRange = parseInt(req.query.timeRange) || 24 * 60 * 60 * 1000;
         const interval = parseInt(req.query.interval) || 60 * 60 * 1000;
@@ -151,7 +152,7 @@ export class DashboardService {
     });
 
     // API: Error statistics
-    this.app.get('/api/errors', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/errors', (req, res) => {
       try {
         const timeRange = parseInt(req.query.timeRange) || 24 * 60 * 60 * 1000;
         const stats = AnalyticsService.getErrorStats({ timeRange });
@@ -162,7 +163,7 @@ export class DashboardService {
     });
 
     // API: System health
-    this.app.get('/api/health', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/health', (req, res) => {
       const health = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -183,7 +184,7 @@ export class DashboardService {
     });
 
     // API: Export report
-    this.app.get('/api/export', rateLimitMiddleware, (req, res) => {
+    this.app.get('/api/export', (req, res) => {
       try {
         const timeRange = parseInt(req.query.timeRange) || 7 * 24 * 60 * 60 * 1000;
         const report = AnalyticsService.exportReport(this.client, { timeRange });
