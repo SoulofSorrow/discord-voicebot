@@ -62,10 +62,31 @@ export class Sanitizer {
   static stripHtml(input) {
     if (!input) return '';
 
-    // Remove all HTML tags including malformed ones
-    return input.toString()
-      .replace(/<[^>]*>/g, '') // Remove all tags
-      .replace(/&lt;[^&]*&gt;/g, '') // Remove escaped tags
+    // First, decode HTML entities to normalize the input
+    let text = input.toString();
+
+    // Decode common HTML entities (iterative to handle nested encoding)
+    for (let i = 0; i < 3; i++) {
+      text = text
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'")
+        .replace(/&#x2F;/g, '/')
+        .replace(/&amp;/g, '&'); // Decode & last
+    }
+
+    // Remove all HTML tags (now all tags are in normalized form)
+    text = text.replace(/<[^>]*>/g, '');
+
+    // Re-escape to prevent any HTML injection in the output
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
       .trim();
   }
 
