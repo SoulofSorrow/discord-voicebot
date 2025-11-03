@@ -76,8 +76,13 @@ export class Sanitizer {
         .replace(/&amp;/g, '&'); // Decode & last
     }
 
-    // Remove all HTML tags (now all tags are in normalized form)
-    text = text.replace(/<[^>]*>/g, '');
+    // Remove all HTML tags iteratively (handles nested tags like <<script>script>)
+    // Keep removing until no more tags are found
+    let previousText;
+    do {
+      previousText = text;
+      text = text.replace(/<[^>]*>/g, '');
+    } while (text !== previousText && text.includes('<'));
 
     // Re-escape to prevent any HTML injection in the output
     return text
