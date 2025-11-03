@@ -37,14 +37,36 @@ export class Sanitizer {
   static sanitizeInput(input, maxLength = 1000) {
     if (!input) return '';
 
-    // Remove potentially dangerous content
+    // Remove potentially dangerous content by escaping HTML
     let sanitized = input.toString()
-      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove script tags
-      .replace(/@(everyone|here)/gi, '') // Remove mass mentions
+      // Escape HTML entities (defense in depth)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
+      // Remove mass mentions
+      .replace(/@(everyone|here)/gi, '')
       .trim()
       .substring(0, maxLength);
 
     return sanitized;
+  }
+
+  /**
+   * Strip all HTML tags from input (for plain text contexts)
+   * @param {string} input - Input string
+   * @returns {string} String with all HTML tags removed
+   */
+  static stripHtml(input) {
+    if (!input) return '';
+
+    // Remove all HTML tags including malformed ones
+    return input.toString()
+      .replace(/<[^>]*>/g, '') // Remove all tags
+      .replace(/&lt;[^&]*&gt;/g, '') // Remove escaped tags
+      .trim();
   }
 
   static sanitizeNumber(input, min = 0, max = 100, defaultValue = 0) {
