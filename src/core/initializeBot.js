@@ -22,6 +22,7 @@ export default async function initializeBot(client) {
     // Initialize collections
     client.activeInteractions = new Set();
     client.modals = new Collection();
+    client.commands = new Collection();
     client.tempVoiceOwners = new Map();
     client.deletedByInteraction = new Set();
 
@@ -33,6 +34,9 @@ export default async function initializeBot(client) {
 
     // Restore channel ownership from database
     restoreChannelOwnership(client);
+
+    // Load commands
+    await loadCommands(client);
 
     // Load modals
     await loadModals(client);
@@ -70,6 +74,47 @@ function restoreChannelOwnership(client) {
     logStartup(`   ✓ Restored ${channels.length} channel ownerships from database`);
   } catch (error) {
     logStartup(`   ⚠  Failed to restore channel ownership: ${error.message}`);
+  }
+}
+
+async function loadCommands(client) {
+  const commandsDir = path.join(__dirname, '../commands');
+
+  try {
+    // Check if commands directory exists
+    if (!fs.existsSync(commandsDir)) {
+      logStartup('   ℹ  No commands directory found, skipping command loading');
+      return;
+    }
+
+    const commandFiles = fs.readdirSync(commandsDir).filter(f =>
+      f.endsWith('.js') && f !== 'index.js'
+    );
+
+    if (commandFiles.length === 0) {
+      logStartup('   ℹ  No command files found');
+      return;
+    }
+
+    for (const file of commandFiles) {
+      try {
+        const command = await import(`../commands/${file}`);
+        const name = path.parse(file).name;
+
+        if (command.data && command.execute) {
+          client.commands.set(command.data.name, command);
+          logStartup(`   ✓ Loaded command: /${command.data.name}`);
+        } else {
+          logStartup(`   ⚠  Invalid command: ${file} (missing data or execute)`);
+        }
+      } catch (error) {
+        logStartup(`   ❌ Failed to load command: ${file} - ${error.message}`);
+      }
+    }
+
+    logStartup(`📋 Loaded ${client.commands.size} slash commands`);
+  } catch (error) {
+    logStartup(`   ❌ Failed to read commands directory: ${error.message}`);
   }
 }
 
