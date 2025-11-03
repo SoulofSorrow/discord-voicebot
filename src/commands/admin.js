@@ -1,11 +1,11 @@
-import { SlashCommandBuilder, PermissionFlagBits } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import AdminService from '../services/AdminService.js';
 import { createEmbed } from '../utils/embeds.js';
 
 export const data = new SlashCommandBuilder()
   .setName('admin')
   .setDescription('Admin commands for bot management')
-  .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addSubcommand(subcommand =>
     subcommand
       .setName('stats')
