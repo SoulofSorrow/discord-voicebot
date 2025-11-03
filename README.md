@@ -31,8 +31,34 @@ TempVoice transforms Discord voice channel management by giving users instant co
 - **👥 User Management**: Trust, block, kick, and transfer ownership seamlessly
 - **⚙️ Customization Options**: Adjust bitrate, region, user limits, and channel names
 - **📊 Built-in Monitoring**: Comprehensive logging and metrics collection
+- **💾 Persistent Storage**: SQLite database for reliable data persistence
+- **🔍 Observability**: Prometheus metrics export and Sentry error tracking
+- **🏥 Health Checks**: Kubernetes-ready liveness and readiness probes
 - **🐳 Docker Ready**: Easy deployment with Docker Compose
 - **⚡ Production Grade**: Rate limiting, error handling, and performance optimization
+
+## 🆕 What's New in v2.0
+
+### Database Persistence
+All channel ownership data and user permissions are now persisted to SQLite database:
+- **Automatic Recovery**: Channel ownership survives bot restarts
+- **Trust/Block Lists**: User permissions stored persistently
+- **Metrics History**: Historical data for analytics
+
+### Monitoring & Observability
+Production-grade monitoring with multiple integrations:
+- **Prometheus Metrics**: Export metrics on `:9090/metrics`
+  - Active channels, creation/deletion counts
+  - Error rates, interaction latency
+  - Cache hit/miss rates
+- **Sentry Integration**: Real-time error tracking with context
+- **Health Checks**: `/health` (liveness) and `/ready` (readiness) endpoints
+
+### Testing Infrastructure
+Comprehensive test coverage for critical components:
+- **Unit Tests**: ValidationService, Sanitizer, CacheManager
+- **Database Tests**: Full DatabaseService test coverage
+- **Native Node.js**: Using built-in `node:test` framework
 
 ## 🏗️ Architecture
 
@@ -99,6 +125,11 @@ ENABLE_LOGGING=true
 MAX_TEMP_CHANNELS=50
 RATE_LIMIT_WINDOW=60000
 RATE_LIMIT_MAX_REQUESTS=10
+
+# Monitoring (OPTIONAL)
+SENTRY_DSN=your_sentry_dsn_here
+METRICS_PORT=9090
+NODE_ENV=production
 ```
 
 ### 3. Discord Setup
@@ -129,6 +160,29 @@ npm run dev
 
 # Production mode
 npm start
+
+# Run tests
+npm test
+```
+
+### 5. Monitoring Endpoints
+
+Once the bot is running, you can access:
+
+- **Prometheus Metrics**: `http://localhost:9090/metrics`
+  - Channel creation/deletion rates
+  - Active channel count
+  - Error counts and types
+  - Interaction latencies
+
+- **Health Check**: `http://localhost:9090/health`
+  - Bot uptime and version
+  - Always returns 200 OK if server is running
+
+- **Readiness Check**: `http://localhost:9090/ready`
+  - Bot status (ready/not ready)
+  - Database initialization status
+  - Used by Kubernetes for traffic routing
 ```
 
 ## 🐳 Docker Deployment

@@ -28,14 +28,19 @@ class InteractionHandler {
 
   async handle(interaction) {
     try {
-      // Rate limiting check
+      // Handle slash commands
+      if (interaction.isChatInputCommand()) {
+        return await this.handleCommand(interaction);
+      }
+
+      // Rate limiting check (for other interaction types)
       const rateLimitCheck = rateLimiter.checkLimit(
-        interaction.user.id, 
-        'interaction', 
+        interaction.user.id,
+        'interaction',
         10, // 10 interactions per minute
         60000
       );
-      
+
       if (!rateLimitCheck.allowed) {
         return interaction.reply({
           content: t('rate_limit_exceeded', this.lang),
@@ -48,7 +53,7 @@ class InteractionHandler {
 
       const { customId } = interaction;
       const userId = interaction.user.id;
-      
+
       metrics.recordInteraction(interaction.type);
 
       // Handle different interaction types
@@ -397,6 +402,38 @@ class InteractionHandler {
         this.client,
         `UserSelect:${customId}`
       );
+    }
+  }
+
+  async handleCommand(interaction) {
+    const command = this.client.commands.get(interaction.commandName);
+
+    if (!command) {
+      console.error(`No command matching ${interaction.commandName} was found.`);
+      return interaction.reply({
+        content: '❌ Command not found!',
+        flags: MessageFlags.Ephemeral
+      });
+    }
+
+    try {
+      await command.execute(interaction);
+      metrics.recordInteraction(`command_${interaction.commandName}`);
+    } catch (error) {
+      console.error(`Error executing command ${interaction.commandName}:`, error);
+
+      const errorMessage = {
+        content: '❌ There was an error executing this command!',
+        flags: MessageFlags.Ephemeral
+      };
+
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(errorMessage);
+      } else {
+        await interaction.reply(errorMessage);
+      }
+
+      await ErrorHandler.handle(error, interaction, this.client, `command_${interaction.commandName}`);
     }
   }
 }
