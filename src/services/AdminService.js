@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagBits } from 'discord.js';
 import { rateLimiter } from '../utils/RateLimiter.js';
 import { cache } from '../utils/CacheManager.js';
 import databaseService from './DatabaseService.js';
