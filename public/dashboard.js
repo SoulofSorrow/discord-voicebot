@@ -269,9 +269,9 @@ function updateTopCreatorsTable(topCreators) {
     const tbody = document.querySelector('#topCreatorsTable tbody');
     tbody.innerHTML = topCreators.slice(0, 10).map((creator, index) => `
         <tr>
-            <td>${index + 1}</td>
-            <td><code>${truncateId(creator.userId)}</code></td>
-            <td>${creator.channelsCreated}</td>
+            <td>${escapeHtml(index + 1)}</td>
+            <td><code>${escapeHtml(truncateId(creator.userId))}</code></td>
+            <td>${escapeHtml(creator.channelsCreated)}</td>
         </tr>
     `).join('');
 }
@@ -288,8 +288,8 @@ function updateErrorsTable(byContext) {
 
     tbody.innerHTML = entries.slice(0, 10).map(([context, count]) => `
         <tr>
-            <td><code>${context}</code></td>
-            <td>${count}</td>
+            <td><code>${escapeHtml(context)}</code></td>
+            <td>${escapeHtml(count)}</td>
         </tr>
     `).join('');
 }
@@ -312,29 +312,29 @@ function updateHealthStatus(data) {
 // Update status indicator
 function updateStatus(status, text) {
     const indicator = document.getElementById('status');
-    indicator.className = `status-indicator ${status}`;
+    indicator.className = `status-indicator ${escapeHtml(status)}`;
     indicator.querySelector('.text').textContent = text;
 }
 
 // Update bot status
 function updateBotStatus(status, text) {
     const element = document.getElementById('botStatus');
-    element.className = `health-value ${status}`;
-    element.innerHTML = `<span class="dot"></span> ${text}`;
+    element.className = `health-value ${escapeHtml(status)}`;
+    element.innerHTML = `<span class="dot"></span> ${escapeHtml(text)}`;
 }
 
 // Update database status
 function updateDatabaseStatus(status, text) {
     const element = document.getElementById('dbStatus');
-    element.className = `health-value ${status}`;
-    element.innerHTML = `<span class="dot"></span> ${text}`;
+    element.className = `health-value ${escapeHtml(status)}`;
+    element.innerHTML = `<span class="dot"></span> ${escapeHtml(text)}`;
 }
 
 // Update WebSocket status
 function updateWebSocketStatus(status, text) {
     const element = document.getElementById('wsStatus');
-    element.className = `health-value ${status}`;
-    element.innerHTML = `<span class="dot"></span> ${text}`;
+    element.className = `health-value ${escapeHtml(status)}`;
+    element.innerHTML = `<span class="dot"></span> ${escapeHtml(text)}`;
 }
 
 // Export report
@@ -359,6 +359,16 @@ async function exportReport() {
 }
 
 // Utility functions
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
