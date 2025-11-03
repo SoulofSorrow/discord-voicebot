@@ -59,9 +59,32 @@ export class DashboardService {
   }
 
   /**
+   * Rate limiting middleware for dashboard routes
+   */
+  rateLimitMiddleware(req, res, next) {
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const identifier = `dashboard:${ip}`;
+
+    // Allow 30 requests per minute per IP
+    if (!rateLimiter.checkLimit(identifier, 'dashboard_access', 30, 60000)) {
+      logger.warn('Dashboard rate limit exceeded', { ip, path: req.path });
+      return res.status(429).json({
+        error: 'Too many requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        retryAfter: 60
+      });
+    }
+
+    next();
+  }
+
+  /**
    * Setup HTTP routes
    */
   setupRoutes() {
+    // Apply rate limiting to all routes
+    this.app.use(this.rateLimitMiddleware.bind(this));
+
     // Main dashboard page
     this.app.get('/', (req, res) => {
       res.sendFile(join(__dirname, '../../public/dashboard.html'));
@@ -175,8 +198,18 @@ export class DashboardService {
   setupWebSocket() {
     this.wss = new WebSocketServer({ server: this.server });
 
-    this.wss.on('connection', (ws) => {
-      logger.info('Dashboard WebSocket client connected');
+    this.wss.on('connection', (ws, req) => {
+      const ip = req.socket.remoteAddress || 'unknown';
+      const identifier = `dashboard:ws:${ip}`;
+
+      // Rate limit WebSocket connections (max 5 per minute per IP)
+      if (!rateLimiter.checkLimit(identifier, 'ws_connection', 5, 60000)) {
+        logger.warn('WebSocket rate limit exceeded', { ip });
+        ws.close(1008, 'Rate limit exceeded');
+        return;
+      }
+
+      logger.info('Dashboard WebSocket client connected', { ip });
 
       // Send initial data
       ws.send(JSON.stringify({
@@ -187,11 +220,11 @@ export class DashboardService {
       }));
 
       ws.on('close', () => {
-        logger.info('Dashboard WebSocket client disconnected');
+        logger.info('Dashboard WebSocket client disconnected', { ip });
       });
 
       ws.on('error', (error) => {
-        logger.error('Dashboard WebSocket error', { error });
+        logger.error('Dashboard WebSocket error', { error, ip });
       });
     });
   }
