@@ -78,10 +78,10 @@ describe('CacheManager', () => {
 
   describe('cleanup', () => {
     it('should remove expired entries', async () => {
-      // Create a cache with short TTL for testing
-      const shortTtlCache = new CacheManager(100); // 100ms TTL
+      // Create a cache and set value with short TTL for testing
+      const shortTtlCache = new CacheManager();
 
-      shortTtlCache.set('key1', 'value1');
+      shortTtlCache.set('key1', 'value1', 100); // 100ms custom TTL
       assert.strictEqual(shortTtlCache.get('key1'), 'value1');
 
       // Wait for expiration
