@@ -74,6 +74,8 @@ const rest = new REST().setToken(DISCORD_TOKEN);
 
     console.log('\n🎉 Command deployment complete!');
     console.log('💡 Commands should appear in Discord within a few seconds.\n');
+
+    process.exit(0);
   } catch (error) {
     console.error('❌ Error deploying commands:', error.message);
 
@@ -87,9 +89,11 @@ const rest = new REST().setToken(DISCORD_TOKEN);
       process.exit(1);
     } else if (error.code === 40060) {
       console.log('\n✅ Commands already up to date (this is fine).');
+      process.exit(0);
     } else {
       console.error('\n⚠️  Warning: Command deployment encountered an error, but continuing...');
       console.error('   Error details:', error.code || 'Unknown');
+      process.exit(1);
     }
   }
 })();
