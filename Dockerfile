@@ -1,5 +1,5 @@
 # Build stage - compile native modules
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Install build dependencies for native modules (better-sqlite3)
 RUN apk add --no-cache \
@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --production --ignore-scripts=false
 
 # Production stage - minimal runtime image
-FROM node:20-alpine
+FROM node:25-alpine
 
 # Install only runtime dependencies
 RUN apk add --no-cache wget
