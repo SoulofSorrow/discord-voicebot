@@ -2,9 +2,10 @@ class CacheManager {
   constructor() {
     this.cache = new Map();
     this.ttl = 5 * 60 * 1000; // 5 Minuten
-    
-    // Cleanup interval
-    setInterval(() => this.cleanup(), 60000); // Jede Minute
+
+    // Cleanup interval - unref() allows Node to exit even if this timer is active
+    this.cleanupInterval = setInterval(() => this.cleanup(), 60000); // Jede Minute
+    this.cleanupInterval.unref();
   }
   
   set(key, value, customTTL = null) {
