@@ -46,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}
+          images: ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -77,7 +77,7 @@ jobs:
         continue-on-error: true
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}
+          subject-name: ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}
           subject-digest: ${{ steps.build-and-push.outputs.digest }}
           push-to-registry: true
 
@@ -94,7 +94,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest'
+          image-ref: '${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -120,10 +120,10 @@ jobs:
 
       - name: Pull and test image
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest
-          docker run --rm ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest node --version
-          docker run --rm ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest npm --version
-          docker inspect ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest
+          docker pull ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest
+          docker run --rm ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest node --version
+          docker run --rm ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest npm --version
+          docker inspect ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest
           echo "✅ Docker image tested successfully"
 
       - name: Verify health check
@@ -135,7 +135,7 @@ jobs:
             -e EMBED_CHANNEL_ID=dummy \
             -e VOICE_CHANNEL_ID=dummy \
             -e LOG_CHANNEL_ID=dummy \
-            ${{ env.REGISTRY }}/${{ toLower(env.IMAGE_NAME) }}:latest || true
+            ${{ env.REGISTRY }}/${{ lower(env.IMAGE_NAME) }}:latest || true
 
           sleep 5
           docker logs test-bot || true
