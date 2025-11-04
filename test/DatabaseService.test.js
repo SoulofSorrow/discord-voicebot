@@ -182,12 +182,10 @@ describe('DatabaseService', () => {
 
   describe('transactions', () => {
     it('should execute transactions atomically', () => {
-      const transaction = databaseService.transaction(() => {
+      databaseService.transaction(() => {
         databaseService.saveChannel('channel1', 'guild1', 'user1');
         databaseService.saveChannel('channel2', 'guild1', 'user2');
       });
-
-      transaction();
 
       const channels = databaseService.getChannelsByGuild('guild1');
       assert.strictEqual(channels.length, 2);

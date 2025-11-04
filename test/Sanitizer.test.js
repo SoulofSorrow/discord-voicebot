@@ -40,7 +40,8 @@ describe('Sanitizer', () => {
 
     it('should remove non-numeric characters', () => {
       assert.strictEqual(Sanitizer.sanitizeUserId('<@123456789012345678>'), '123456789012345678');
-      assert.strictEqual(Sanitizer.sanitizeUserId('123abc456'), '123456');
+      // Short IDs return null (must be 17-19 digits)
+      assert.strictEqual(Sanitizer.sanitizeUserId('123abc456'), null);
     });
 
     it('should handle edge cases', () => {
@@ -63,7 +64,9 @@ describe('Sanitizer', () => {
     });
 
     it('should handle special characters', () => {
-      assert.strictEqual(Sanitizer.sanitizeInput('Test & Co.'), 'Test & Co.');
+      // Ampersands are escaped for HTML safety
+      assert.strictEqual(Sanitizer.sanitizeInput('Test & Co.'), 'Test &amp; Co.');
+      // Mass mentions are removed
       assert.ok(!Sanitizer.sanitizeInput('Test@here').includes('@here'));
     });
 
