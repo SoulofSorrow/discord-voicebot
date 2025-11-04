@@ -261,13 +261,12 @@ Comprehensive PR template including:
 
 Add these to your README:
 
-```markdown
+
 ![CI](https://github.com/SoulofSorrow/discord-voicebot/workflows/CI/badge.svg)
 ![Docker](https://github.com/SoulofSorrow/discord-voicebot/workflows/Docker%20Build%20%26%20Publish/badge.svg)
 ![CodeQL](https://github.com/SoulofSorrow/discord-voicebot/workflows/CodeQL%20Security%20Analysis/badge.svg)
 ![License](https://img.shields.io/github/license/SoulofSorrow/discord-voicebot)
-![Version](https://img.shields.io/github/v/release/SoulofSorrow/discord-voicebot)
-```
+
 
 ---
 
