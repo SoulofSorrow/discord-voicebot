@@ -143,7 +143,6 @@ class InteractionHandler {
       kick: () => this.showUserSelectMenu(interaction, customId, userId),
       transfer: () => this.showUserSelectMenu(interaction, customId, userId),
       bitrate: () => this.showBitrateMenu(interaction, userId),
-      region: () => this.showRegionMenu(interaction, userId),
       preset: () => this.showPresetMenu(interaction, userId),
       // Direct handlers
       claim: () => this.executeDirectModal(interaction, customId),
