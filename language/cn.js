@@ -7,7 +7,7 @@ const cn = {
     "name_desc": "修改语音频道名称",
     "limit_desc": "设置频道人数上限",
     "privacy_desc": "调整频道隐私设置",
-    "dnd_desc": "切换"请勿打扰"模式",
+    "dnd_desc": "切换\"请勿打扰\"模式",
     "preset_desc": "应用频道模板（游戏、音乐、VIP等）",
     "trust_desc": "允许指定用户加入并互动",
     "untrust_desc": "移除指定用户的访问权限",
