@@ -1,3 +1,5 @@
+import { Sanitizer } from './Sanitizer.js';
+
 /**
  * Enhanced validation service with detailed feedback
  * @class ValidationService
@@ -45,6 +47,16 @@ export class ValidationService {
         error: 'invalid_name',
         message: 'Channel name contains forbidden characters or patterns',
         hint: 'Avoid: < > @everyone @here ``` discord.gg'
+      };
+    }
+
+    // Check for profanity/inappropriate content
+    if (Sanitizer.containsProfanity(trimmed)) {
+      return {
+        valid: false,
+        error: 'inappropriate_name',
+        message: 'Channel name contains inappropriate or offensive language',
+        hint: 'Please choose a more appropriate name'
       };
     }
 
