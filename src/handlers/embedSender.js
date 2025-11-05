@@ -23,7 +23,7 @@ const unicodeEmojis = {
   claim: '🙋',
   transfer: '🔄',
   delete: '🗑️',
-  preset: '⚙️'
+  preset: '🌐'
 }
 
 export const embedSender = async channel => {

@@ -19,7 +19,7 @@ const unicodeEmojis = {
   limit: '🔢',
   privacy: '🔒',
   dnd: '🔕',
-  preset: '⚙️',
+  preset: '🌐',
   trust: '✅',
   untrust: '🚫',
   block: '⛔',
