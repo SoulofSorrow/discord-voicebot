@@ -86,7 +86,7 @@ class InteractionHandler {
     
     const validation = ValidationService.validateVoiceChannel(interaction.member);
     
-    if (!interaction.isButton() && !interaction.isSelectMenu()) {
+    if (!interaction.isButton() && !interaction.isStringSelectMenu() && !interaction.isUserSelectMenu()) {
       return true;
     }
 
