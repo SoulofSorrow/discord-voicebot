@@ -62,7 +62,8 @@ export const embedSender = async channel => {
     ['name', '1356995682963292230'],
     ['limit', '1356995669298122854'],
     ['privacy', '1356995699472076820'],
-    ['dnd', '1356995625404858558']
+    ['dnd', '1356995625404858558'],
+    ['preset', '1356995714542075914']
   )
 
   const buttons2 = row(
@@ -81,13 +82,9 @@ export const embedSender = async channel => {
     ['delete', '1356995611185909824', ButtonStyle.Danger]
   )
 
-  const buttons4 = row(
-    ['preset', '1356995714542075914']
-  )
-
   const payload = {
     embeds: [embed],
-    components: [buttons1, buttons2, buttons3, buttons4]
+    components: [buttons1, buttons2, buttons3]
   }
 
   if (existingMessage) {
