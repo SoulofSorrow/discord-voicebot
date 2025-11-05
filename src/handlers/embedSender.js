@@ -13,7 +13,6 @@ const unicodeEmojis = {
   limit: '🔢',
   privacy: '🔒',
   dnd: '🔕',
-  region: '🌐',
   trust: '✅',
   untrust: '🚫',
   block: '⛔',
@@ -23,7 +22,8 @@ const unicodeEmojis = {
   kick: '👢',
   claim: '🙋',
   transfer: '🔄',
-  delete: '🗑️'
+  delete: '🗑️',
+  preset: '🌐'
 }
 
 export const embedSender = async channel => {
@@ -63,7 +63,7 @@ export const embedSender = async channel => {
     ['limit', '1356995669298122854'],
     ['privacy', '1356995699472076820'],
     ['dnd', '1356995625404858558'],
-    ['region', '1356995714542075914']
+    ['preset', '1356995714542075914']
   )
 
   const buttons2 = row(

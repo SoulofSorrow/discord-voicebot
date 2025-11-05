@@ -20,6 +20,7 @@ export class VoiceChannelService {
         name: channelName,
         type: ChannelType.GuildVoice,
         parent: process.env.CATEGORY_CHANNEL_ID,
+        rtcRegion: null, // Auto region selection (optimal)
         permissionOverwrites: [
           {
             id: member.id,

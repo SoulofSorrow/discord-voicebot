@@ -17,6 +17,7 @@ import { metrics } from '../utils/MetricsCollector.js';
 import { log } from '../utils/logger.js';
 import t from '../utils/t.js';
 import config from '../../config/config.js';
+import PresetService from '../services/PresetService.js';
 
 class InteractionHandler {
   constructor(client) {
@@ -85,7 +86,7 @@ class InteractionHandler {
     
     const validation = ValidationService.validateVoiceChannel(interaction.member);
     
-    if (!interaction.isButton() && !interaction.isSelectMenu()) {
+    if (!interaction.isButton() && !interaction.isStringSelectMenu() && !interaction.isUserSelectMenu()) {
       return true;
     }
 
@@ -142,7 +143,7 @@ class InteractionHandler {
       kick: () => this.showUserSelectMenu(interaction, customId, userId),
       transfer: () => this.showUserSelectMenu(interaction, customId, userId),
       bitrate: () => this.showBitrateMenu(interaction, userId),
-      region: () => this.showRegionMenu(interaction, userId),
+      preset: () => this.showPresetMenu(interaction, userId),
       // Direct handlers
       claim: () => this.executeDirectModal(interaction, customId),
       delete: () => this.executeDirectModal(interaction, customId),
@@ -321,6 +322,36 @@ class InteractionHandler {
     });
 
     this.setupCollector(interaction, userId, 'region_select', ComponentType.StringSelect);
+  }
+
+  async showPresetMenu(interaction, userId) {
+    if (!this.checkActiveInteraction(interaction, userId)) return;
+    this.activeInteractions.add(userId);
+
+    const presetOptions = PresetService.getPresetOptions();
+
+    const options = presetOptions.map(preset =>
+      new StringSelectMenuOptionBuilder()
+        .setLabel(preset.label)
+        .setDescription(preset.description)
+        .setValue(preset.value)
+        .setEmoji(preset.emoji)
+    );
+
+    const row = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('preset_select')
+        .setPlaceholder('⚙️ Choose a channel preset')
+        .addOptions(options)
+    );
+
+    await interaction.reply({
+      content: '⚙️ **Channel Presets**\nChoose a preset template to quickly configure your channel.',
+      components: [row],
+      flags: MessageFlags.Ephemeral
+    });
+
+    this.setupCollector(interaction, userId, 'preset_select', ComponentType.StringSelect);
   }
 
   setupCollector(interaction, userId, customId, componentType) {
