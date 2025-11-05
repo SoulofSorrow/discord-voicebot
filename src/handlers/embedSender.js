@@ -23,7 +23,8 @@ const unicodeEmojis = {
   kick: '👢',
   claim: '🙋',
   transfer: '🔄',
-  delete: '🗑️'
+  delete: '🗑️',
+  preset: '⚙️'
 }
 
 export const embedSender = async channel => {
@@ -82,9 +83,13 @@ export const embedSender = async channel => {
     ['delete', '1356995611185909824', ButtonStyle.Danger]
   )
 
+  const buttons4 = row(
+    ['preset', '1356995699472076821']
+  )
+
   const payload = {
     embeds: [embed],
-    components: [buttons1, buttons2, buttons3]
+    components: [buttons1, buttons2, buttons3, buttons4]
   }
 
   if (existingMessage) {
