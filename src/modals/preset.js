@@ -66,11 +66,21 @@ export default {
           });
 
           // Create success embed
+          const fields = PresetService.getPresetFields(selectedPreset);
+
+          // Update bitrate field if it was limited
+          if (result.applied.bitrateNote) {
+            const bitrateField = fields.find(f => f.name === '🎵 Audio Quality');
+            if (bitrateField) {
+              bitrateField.value = `${result.applied.bitrate} kbps\n⚠️ ${result.applied.bitrateNote}`;
+            }
+          }
+
           const embed = {
             color: 0x57F287, // Green
             title: `${preset.icon} Preset Applied: ${preset.name}`,
             description: preset.description,
-            fields: PresetService.getPresetFields(selectedPreset),
+            fields,
             footer: {
               text: 'You can further customize your channel using the dashboard',
             },

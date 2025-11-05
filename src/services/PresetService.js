@@ -184,10 +184,18 @@ export class PresetService {
     const applied = {};
 
     try {
-      // Apply bitrate
+      // Apply bitrate with server limit validation
       if (settings.bitrate) {
-        await channel.setBitrate(settings.bitrate * 1000); // Convert to bits
-        applied.bitrate = settings.bitrate;
+        const requestedBitrate = settings.bitrate * 1000; // Convert to bits
+        const maxBitrate = channel.guild.maximumBitrate || 96000; // Default to 96kbps if not available
+        const actualBitrate = Math.min(requestedBitrate, maxBitrate);
+
+        await channel.setBitrate(actualBitrate);
+        applied.bitrate = actualBitrate / 1000; // Store as kbps
+
+        if (requestedBitrate > maxBitrate) {
+          applied.bitrateNote = `Limited to ${maxBitrate / 1000} kbps (server max)`;
+        }
       }
 
       // Apply user limit
