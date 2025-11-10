@@ -128,7 +128,7 @@ jobs:
           cat code-metrics.txt
 
       - name: Upload metrics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: code-metrics
           path: code-metrics.txt
