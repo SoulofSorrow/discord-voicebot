@@ -80,7 +80,7 @@ jobs:
       - name: Generate artifact attestation
         if: github.event_name != 'pull_request' && steps.build-and-push.outputs.digest != ''
         continue-on-error: true
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ steps.image-name.outputs.lowercase }}
           subject-digest: ${{ steps.build-and-push.outputs.digest }}
