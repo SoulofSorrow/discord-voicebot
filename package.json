@@ -42,7 +42,7 @@
     "npm": ">=8.0.0"
   },
   "dependencies": {
-    "@sentry/node": "^10.22.0",
+    "@sentry/node": "^10.26.0",
     "better-sqlite3": "^12.4.1",
     "chart.js": "^4.5.1",
     "cookie-parser": "^1.4.7",
