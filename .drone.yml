@@ -133,15 +133,3 @@ volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
-
-trigger:
-  branch:
-    - main
-    - master
-    - develop
-    - dev/*
-  event:
-    - push
-    - tag
-    - pull_request
-ENDOFFILE
