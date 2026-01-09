@@ -36,7 +36,7 @@ steps:
       urls:
         from_secret: webhook_url
       content_type: application/json
-      template: |
+      template: >
         {
           "status": "success",
           "repo": "{{ repo.name }}",
@@ -57,7 +57,7 @@ steps:
       urls:
         from_secret: webhook_url
       content_type: application/json
-      template: |
+      template: >
         {
           "status": "failure",
           "repo": "{{ repo.name }}",
