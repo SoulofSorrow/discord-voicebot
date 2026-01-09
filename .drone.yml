@@ -19,7 +19,7 @@ steps:
         from_secret: gitea_token
     commands:
       - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
       - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} -t ${DOCKER_REPO}:${DRONE_TAG} .
       - docker push ${DOCKER_REPO}:latest
       - docker push ${DOCKER_REPO}:${SHORT_SHA}
