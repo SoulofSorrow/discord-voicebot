@@ -1,3 +1,4 @@
+cat > .drone.yml << 'ENDOFFILE'
 kind: pipeline
 type: docker
 name: build-and-push
@@ -18,12 +19,11 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
       - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
-      - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} -t ${DOCKER_REPO}:${DRONE_TAG} .
-      - docker push ${DOCKER_REPO}:latest
-      - docker push ${DOCKER_REPO}:${SHORT_SHA}
-      - if [ -n "${DRONE_TAG}" ]; then docker push ${DOCKER_REPO}:${DRONE_TAG}; fi
+      - 'docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} .'
+      - 'docker push ${DOCKER_REPO}:latest'
+      - 'docker push ${DOCKER_REPO}:${SHORT_SHA}'
     when:
       event:
         - push
@@ -79,9 +79,10 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-      - docker buildx create --use --name multiarch-builder || true
-      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${DRONE_COMMIT_SHA} --push .
+      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
+      - 'docker buildx create --use --name multiarch-builder || true'
+      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
+      - 'docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} --push .'
     when:
       event:
         - tag
@@ -117,11 +118,11 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .
-      - docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}
-      - docker push ${DOCKER_REPO}:dev-${SHORT_SHA}
+      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
+      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
+      - 'docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .'
+      - 'docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}'
+      - 'docker push ${DOCKER_REPO}:dev-${SHORT_SHA}'
     when:
       branch:
         - develop
@@ -144,3 +145,4 @@ trigger:
     - push
     - tag
     - pull_request
+ENDOFFILE
