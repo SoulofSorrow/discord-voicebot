@@ -5,24 +5,25 @@ name: build-and-push
 steps:
   # Build and push Docker image to Gitea registry
   - name: build-and-push-docker
-    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
-    settings:
-      registry:
+    image: docker:27-cli
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    environment:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
-      tags:
-        - latest
-        - ${DRONE_COMMIT_SHA:0:8}
-        - ${DRONE_TAG}
-      username:
+      GITEA_USER:
         from_secret: gitea_username
-      password:
+      GITEA_TOKEN:
         from_secret: gitea_token
-      auto_tag: true
-      auto_tag_suffix: linux-amd64
-      dockerfile: Dockerfile
-      context: .
+    commands:
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - docker build -t $DOCKER_REPO:latest -t $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8} -t $DOCKER_REPO:${DRONE_TAG} .
+      - docker push $DOCKER_REPO:latest
+      - docker push $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8}
+      - if [ -n "$DRONE_TAG" ]; then docker push $DOCKER_REPO:${DRONE_TAG}; fi
     when:
       event:
         - push
@@ -70,6 +71,11 @@ steps:
         - failure
     failure: ignore
 
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
 ---
 # Multi-architecture build (optional)
 kind: pipeline
@@ -78,30 +84,33 @@ name: build-multi-arch
 
 steps:
   - name: build-and-push-multiarch
-    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
-    settings:
-      registry:
+    image: docker:27-cli
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    environment:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
-      tags:
-        - latest
-        - ${DRONE_COMMIT_SHA:0:8}
-      username:
+      GITEA_USER:
         from_secret: gitea_username
-      password:
+      GITEA_TOKEN:
         from_secret: gitea_token
-      dockerfile: Dockerfile
-      build_args:
-        - BUILDKIT_INLINE_CACHE=1
-      platforms:
-        - linux/amd64
-        - linux/arm64
+    commands:
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - docker buildx create --use --name multiarch-builder || true
+      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_REPO:latest -t $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8} --push .
     when:
       event:
         - tag
       ref:
         - refs/tags/v*
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 
 depends_on:
   - build-and-push
@@ -114,27 +123,35 @@ name: development-build
 
 steps:
   - name: build-dev-image
-    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
-    settings:
-      registry:
+    image: docker:27-cli
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    environment:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
-      tags:
-        - dev-${DRONE_BRANCH}
-        - dev-${DRONE_COMMIT_SHA:0:8}
-      username:
+      GITEA_USER:
         from_secret: gitea_username
-      password:
+      GITEA_TOKEN:
         from_secret: gitea_token
-      dockerfile: Dockerfile
-      context: .
+    commands:
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - docker build -t $DOCKER_REPO:dev-${DRONE_BRANCH} -t $DOCKER_REPO:dev-${DRONE_COMMIT_SHA:0:8} .
+      - docker push $DOCKER_REPO:dev-${DRONE_BRANCH}
+      - docker push $DOCKER_REPO:dev-${DRONE_COMMIT_SHA:0:8}
     when:
       branch:
         - develop
         - dev/*
       event:
         - push
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 
 trigger:
   branch:
