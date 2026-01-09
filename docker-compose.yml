@@ -2,13 +2,13 @@ version: '3.9'
 
 services:
   bot:
-    image: ghcr.io/soulofsorrow/discord-tempvoice  # offizielles Image
-    #build: .                                     # optional: lokal bauen
+    image: dc-test  # offizielles Image
+#    build: .                                     # optional: lokal bauen
     env_file:
       - .env
     restart: unless-stopped
     ports:
-      - "${DASHBOARD_PORT:-3000}:3000"  # Dashboard Web UI
+      - 4000:3000  # Dashboard Web UI
       - "${METRICS_PORT:-9090}:9090"    # Prometheus metrics
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/health"]
