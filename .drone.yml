@@ -5,7 +5,7 @@ name: build-and-push
 steps:
   # Build and push Docker image to Gitea registry
   - name: build-and-push-docker
-    image: plugins/docker:24
+    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
     settings:
       registry:
         from_secret: GITEA_REGISTRY
@@ -78,7 +78,7 @@ name: build-multi-arch
 
 steps:
   - name: build-and-push-multiarch
-    image: plugins/docker:24
+    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
     settings:
       registry:
         from_secret: GITEA_REGISTRY
@@ -114,7 +114,7 @@ name: development-build
 
 steps:
   - name: build-dev-image
-    image: plugins/docker:24
+    image: thegeeklab/drone-docker:24  # <-- Aktualisiert
     settings:
       registry:
         from_secret: GITEA_REGISTRY
