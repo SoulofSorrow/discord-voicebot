@@ -3,7 +3,6 @@ type: docker
 name: build-and-push
 
 steps:
-  # Build and push Docker image to Gitea registry
   - name: build-and-push-docker
     image: docker:27-cli
     volumes:
@@ -18,19 +17,18 @@ steps:
         from_secret: gitea_username
       GITEA_TOKEN:
         from_secret: gitea_token
-  commands:
-    - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-    - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-    - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} -t ${DOCKER_REPO}:${DRONE_TAG} .
-    - docker push ${DOCKER_REPO}:latest
-    - docker push ${DOCKER_REPO}:${SHORT_SHA}
-    - '[ -n "${DRONE_TAG}" ] && docker push ${DOCKER_REPO}:${DRONE_TAG} || true'
+    commands:
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} -t ${DOCKER_REPO}:${DRONE_TAG} .
+      - docker push ${DOCKER_REPO}:latest
+      - docker push ${DOCKER_REPO}:${SHORT_SHA}
+      - if [ -n "${DRONE_TAG}" ]; then docker push ${DOCKER_REPO}:${DRONE_TAG}; fi
     when:
       event:
         - push
         - tag
 
-  # Optional: Send notification on success
   - name: notify-success
     image: plugins/webhook
     settings:
@@ -43,7 +41,6 @@ steps:
         - success
     failure: ignore
 
-  # Optional: Send notification on failure
   - name: notify-failure
     image: plugins/webhook
     settings:
@@ -62,7 +59,6 @@ volumes:
       path: /var/run/docker.sock
 
 ---
-# Multi-architecture build (optional)
 kind: pipeline
 type: docker
 name: build-multi-arch
@@ -85,7 +81,7 @@ steps:
     commands:
       - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
       - docker buildx create --use --name multiarch-builder || true
-      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_REPO:latest -t $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8} --push .
+      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${DRONE_COMMIT_SHA} --push .
     when:
       event:
         - tag
@@ -101,7 +97,6 @@ depends_on:
   - build-and-push
 
 ---
-# Trigger pipeline for specific branches
 kind: pipeline
 type: docker
 name: development-build
@@ -123,9 +118,10 @@ steps:
         from_secret: gitea_token
     commands:
       - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-      - docker build -t $DOCKER_REPO:dev-${DRONE_BRANCH} -t $DOCKER_REPO:dev-${DRONE_COMMIT_SHA:0:8} .
-      - docker push $DOCKER_REPO:dev-${DRONE_BRANCH}
-      - docker push $DOCKER_REPO:dev-${DRONE_COMMIT_SHA:0:8}
+      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .
+      - docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}
+      - docker push ${DOCKER_REPO}:dev-${SHORT_SHA}
     when:
       branch:
         - develop
