@@ -18,12 +18,13 @@ steps:
         from_secret: gitea_username
       GITEA_TOKEN:
         from_secret: gitea_token
-    commands:
-      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
-      - docker build -t $DOCKER_REPO:latest -t $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8} -t $DOCKER_REPO:${DRONE_TAG} .
-      - docker push $DOCKER_REPO:latest
-      - docker push $DOCKER_REPO:${DRONE_COMMIT_SHA:0:8}
-      - if [ -n "$DRONE_TAG" ]; then docker push $DOCKER_REPO:${DRONE_TAG}; fi
+  commands:
+    - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+    - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+    - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} -t ${DOCKER_REPO}:${DRONE_TAG} .
+    - docker push ${DOCKER_REPO}:latest
+    - docker push ${DOCKER_REPO}:${SHORT_SHA}
+    - '[ -n "${DRONE_TAG}" ] && docker push ${DOCKER_REPO}:${DRONE_TAG} || true'
     when:
       event:
         - push
