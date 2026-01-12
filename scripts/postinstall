@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+console.log('🛠️  Post-Install Setup...');
+
+// Check for optional dependencies
+const optionalDeps = ['bufferutil', 'utf-8-validate'];
+const missing = [];
+
+for (const dep of optionalDeps) {
+  try {
+    require.resolve(dep);
+  } catch {
+    missing.push(dep);
+  }
+}
+
+if (missing.length > 0) {
+  console.log('💡 Optional dependencies missing (for better performance):');
+  console.log(`   npm install ${missing.join(' ')}`);
+}
+
+console.log('✅ Post-install setup completed');

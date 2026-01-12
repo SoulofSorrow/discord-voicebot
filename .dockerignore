@@ -1,0 +1,58 @@
+# Version Control
+.git
+.gitignore
+.github
+
+# CI/CD
+Jenkinsfile*
+.gitlab-ci.yml
+
+# Docs
+*.md
+!README.md
+docs/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Java
+target/
+.gradle/
+
+# Testing
+test/
+tests/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.swp
+
+# Dev Tools
+Makefile
+.editorconfig
+docker-compose.yml
+
+# Secrets
+*.pem
+*.key
+.env
+.env.*
+!.env.example

@@ -1,0 +1,57 @@
+# Auto-label PRs based on files changed
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['*.md', 'docs/**/*']
+
+docker:
+  - changed-files:
+    - any-glob-to-any-file: ['Dockerfile', 'docker-compose.yml', '.dockerignore']
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file: ['.github/**/*']
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: ['package.json', 'package-lock.json']
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file: ['test/**/*', '**/*.test.js']
+
+dashboard:
+  - changed-files:
+    - any-glob-to-any-file: ['public/**/*', 'src/services/DashboardService.js']
+
+database:
+  - changed-files:
+    - any-glob-to-any-file: ['src/services/DatabaseService.js']
+
+monitoring:
+  - changed-files:
+    - any-glob-to-any-file: ['src/services/MonitoringService.js', 'src/services/AnalyticsService.js']
+
+core:
+  - changed-files:
+    - any-glob-to-any-file: ['src/core/**/*', 'src/index.js']
+
+services:
+  - changed-files:
+    - any-glob-to-any-file: ['src/services/**/*']
+
+utils:
+  - changed-files:
+    - any-glob-to-any-file: ['src/utils/**/*']
+
+modals:
+  - changed-files:
+    - any-glob-to-any-file: ['src/modals/**/*']
+
+language:
+  - changed-files:
+    - any-glob-to-any-file: ['language/**/*']
+
+config:
+  - changed-files:
+    - any-glob-to-any-file: ['config/**/*', '.env.example', 'env.example']
