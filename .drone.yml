@@ -6,6 +6,9 @@ services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    command:
+      - --host=tcp://0.0.0.0:2375
+      - --tls=false
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -15,6 +18,7 @@ steps:
     image: docker:27-cli
     environment:
       DOCKER_HOST: tcp://docker:2375
+      DOCKER_TLS_CERTDIR: ""
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
       DOCKER_REPO:
@@ -25,11 +29,12 @@ steps:
         from_secret: gitea_token
     commands:
       - sleep 5
-      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
-      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
-      - 'docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} .'
-      - 'docker push ${DOCKER_REPO}:latest'
-      - 'docker push ${DOCKER_REPO}:${SHORT_SHA}'
+      - docker info
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} .
+      - docker push ${DOCKER_REPO}:latest
+      - docker push ${DOCKER_REPO}:${SHORT_SHA}
     when:
       event:
         - push
@@ -44,10 +49,16 @@ kind: pipeline
 type: docker
 name: build-multi-arch
 
+depends_on:
+  - build-and-push
+
 services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    command:
+      - --host=tcp://0.0.0.0:2375
+      - --tls=false
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -57,6 +68,7 @@ steps:
     image: docker:27-cli
     environment:
       DOCKER_HOST: tcp://docker:2375
+      DOCKER_TLS_CERTDIR: ""
       DOCKER_CLI_EXPERIMENTAL: enabled
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
@@ -68,10 +80,16 @@ steps:
         from_secret: gitea_token
     commands:
       - sleep 5
-      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
-      - 'docker buildx create --use --name multiarch-builder --driver docker-container || true'
-      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
-      - 'docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} --push .'
+      - docker info
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - docker buildx create --use --name multiarch-builder --driver docker-container || true
+      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          -t ${DOCKER_REPO}:latest \
+          -t ${DOCKER_REPO}:${SHORT_SHA} \
+          --push .
     when:
       event:
         - tag
@@ -82,9 +100,6 @@ volumes:
   - name: docker-storage
     temp: {}
 
-depends_on:
-  - build-and-push
-
 ---
 kind: pipeline
 type: docker
@@ -94,6 +109,9 @@ services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    command:
+      - --host=tcp://0.0.0.0:2375
+      - --tls=false
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -103,6 +121,7 @@ steps:
     image: docker:27-cli
     environment:
       DOCKER_HOST: tcp://docker:2375
+      DOCKER_TLS_CERTDIR: ""
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
       DOCKER_REPO:
@@ -113,11 +132,14 @@ steps:
         from_secret: gitea_token
     commands:
       - sleep 5
-      - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
-      - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
-      - 'docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .'
-      - 'docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}'
-      - 'docker push ${DOCKER_REPO}:dev-${SHORT_SHA}'
+      - docker info
+      - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
+      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
+      - docker build \
+          -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} \
+          -t ${DOCKER_REPO}:dev-${SHORT_SHA} .
+      - docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}
+      - docker push ${DOCKER_REPO}:dev-${SHORT_SHA}
     when:
       branch:
         - develop
