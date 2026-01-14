@@ -1,3 +1,6 @@
+# ------------------------------------------------------------------
+# 1️⃣ build‑and‑push (single‑arch Docker image)
+# ------------------------------------------------------------------
 kind: pipeline
 type: docker
 name: build-and-push
@@ -7,8 +10,8 @@ services:
     image: docker:27-dind
     privileged: true
     command:
-      - --host=tcp://0.0.0.0:2375
-      - --tls=false
+      - "--host=tcp://0.0.0.0:2375"
+      - "--tls=false"
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -19,14 +22,10 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY:
-        from_secret: GITEA_REGISTRY
-      DOCKER_REPO:
-        from_secret: docker_repo
-      GITEA_USER:
-        from_secret: gitea_username
-      GITEA_TOKEN:
-        from_secret: gitea_token
+      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
+      DOCKER_REPO:   from_secret: docker_repo
+      GITEA_USER:    from_secret: gitea_username
+      GITEA_TOKEN:   from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
@@ -44,11 +43,12 @@ volumes:
   - name: docker-storage
     temp: {}
 
----
+# ------------------------------------------------------------------
+# 2️⃣ build‑multi‑arch (multi‑arch image via buildx)
+# ------------------------------------------------------------------
 kind: pipeline
 type: docker
 name: build-multi-arch
-
 depends_on:
   - build-and-push
 
@@ -57,8 +57,8 @@ services:
     image: docker:27-dind
     privileged: true
     command:
-      - --host=tcp://0.0.0.0:2375
-      - --tls=false
+      - "--host=tcp://0.0.0.0:2375"
+      - "--tls=false"
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -70,14 +70,10 @@ steps:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
       DOCKER_CLI_EXPERIMENTAL: enabled
-      GITEA_REGISTRY:
-        from_secret: GITEA_REGISTRY
-      DOCKER_REPO:
-        from_secret: docker_repo
-      GITEA_USER:
-        from_secret: gitea_username
-      GITEA_TOKEN:
-        from_secret: gitea_token
+      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
+      DOCKER_REPO:   from_secret: docker_repo
+      GITEA_USER:    from_secret: gitea_username
+      GITEA_TOKEN:   from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
@@ -85,12 +81,12 @@ steps:
       - docker buildx create --use --name multiarch-builder --driver docker-container || true
       - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
       - >
-        sh -c "docker buildx build
-        --platform linux/amd64,linux/arm64
-        --build-arg BUILDKIT_INLINE_CACHE=1
-        -t ${DOCKER_REPO}:latest
-        -t ${DOCKER_REPO}:${SHORT_SHA}
-        --push ."
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          -t ${DOCKER_REPO}:latest \
+          -t ${DOCKER_REPO}:${SHORT_SHA} \
+          --push .
     when:
       event:
         - tag
@@ -101,7 +97,9 @@ volumes:
   - name: docker-storage
     temp: {}
 
----
+# ------------------------------------------------------------------
+# 3️⃣ development‑build (dev‑image für Branches)
+# ------------------------------------------------------------------
 kind: pipeline
 type: docker
 name: development-build
@@ -111,8 +109,8 @@ services:
     image: docker:27-dind
     privileged: true
     command:
-      - --host=tcp://0.0.0.0:2375
-      - --tls=false
+      - "--host=tcp://0.0.0.0:2375"
+      - "--tls=false"
     volumes:
       - name: docker-storage
         path: /var/lib/docker
@@ -123,14 +121,10 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY:
-        from_secret: GITEA_REGISTRY
-      DOCKER_REPO:
-        from_secret: docker_repo
-      GITEA_USER:
-        from_secret: gitea_username
-      GITEA_TOKEN:
-        from_secret: gitea_token
+      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
+      DOCKER_REPO:   from_secret: docker_repo
+      GITEA_USER:    from_secret: gitea_username
+      GITEA_TOKEN:   from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
