@@ -84,7 +84,8 @@ steps:
       - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
       - docker buildx create --use --name multiarch-builder --driver docker-container || true
       - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker buildx build \
+      - |
+        docker buildx build \
           --platform linux/amd64,linux/arm64 \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           -t ${DOCKER_REPO}:latest \
@@ -135,9 +136,7 @@ steps:
       - docker info
       - echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin
       - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker build \
-          -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} \
-          -t ${DOCKER_REPO}:dev-${SHORT_SHA} .
+      - docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .
       - docker push ${DOCKER_REPO}:dev-${DRONE_BRANCH}
       - docker push ${DOCKER_REPO}:dev-${SHORT_SHA}
     when:
