@@ -1,13 +1,20 @@
 kind: pipeline
 type: docker
 name: build-and-push
+
+services:
+  - name: docker
+    image: docker:27-dind
+    privileged: true
+    volumes:
+      - name: docker-storage
+        path: /var/lib/docker
+
 steps:
   - name: build-and-push-docker
     image: docker:27-cli
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
     environment:
+      DOCKER_HOST: tcp://docker:2375
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
       DOCKER_REPO:
@@ -17,6 +24,7 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
+      - sleep 5
       - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
       - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
       - 'docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} .'
@@ -28,20 +36,28 @@ steps:
         - tag
 
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+  - name: docker-storage
+    temp: {}
+
 ---
 kind: pipeline
 type: docker
 name: build-multi-arch
+
+services:
+  - name: docker
+    image: docker:27-dind
+    privileged: true
+    volumes:
+      - name: docker-storage
+        path: /var/lib/docker
+
 steps:
   - name: build-and-push-multiarch
     image: docker:27-cli
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
     environment:
+      DOCKER_HOST: tcp://docker:2375
+      DOCKER_CLI_EXPERIMENTAL: enabled
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
       DOCKER_REPO:
@@ -51,8 +67,9 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
+      - sleep 5
       - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
-      - 'docker buildx create --use --name multiarch-builder || true'
+      - 'docker buildx create --use --name multiarch-builder --driver docker-container || true'
       - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
       - 'docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${SHORT_SHA} --push .'
     when:
@@ -60,23 +77,32 @@ steps:
         - tag
       ref:
         - refs/tags/v*
+
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+  - name: docker-storage
+    temp: {}
+
 depends_on:
   - build-and-push
+
 ---
 kind: pipeline
 type: docker
 name: development-build
+
+services:
+  - name: docker
+    image: docker:27-dind
+    privileged: true
+    volumes:
+      - name: docker-storage
+        path: /var/lib/docker
+
 steps:
   - name: build-dev-image
     image: docker:27-cli
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
     environment:
+      DOCKER_HOST: tcp://docker:2375
       GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
       DOCKER_REPO:
@@ -86,6 +112,7 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
+      - sleep 5
       - 'echo "$GITEA_TOKEN" | docker login $GITEA_REGISTRY -u "$GITEA_USER" --password-stdin'
       - 'export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)'
       - 'docker build -t ${DOCKER_REPO}:dev-${DRONE_BRANCH} -t ${DOCKER_REPO}:dev-${SHORT_SHA} .'
@@ -97,7 +124,7 @@ steps:
         - dev/*
       event:
         - push
+
 volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
+  - name: docker-storage
+    temp: {}
