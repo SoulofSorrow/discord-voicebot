@@ -1,7 +1,6 @@
 kind: pipeline
 type: docker
 name: build-and-push
-
 steps:
   - name: build-and-push-docker
     image: docker:27-cli
@@ -28,40 +27,14 @@ steps:
         - push
         - tag
 
-  - name: notify-success
-    image: plugins/webhook
-    settings:
-      urls:
-        from_secret: webhook_url
-      content_type: application/json
-      template: '{"status":"success","repo":"{{ repo.name }}","commit":"{{ build.commit }}","branch":"{{ build.branch }}","author":"{{ build.author }}","message":"{{ build.message }}"}'
-    when:
-      status:
-        - success
-    failure: ignore
-
-  - name: notify-failure
-    image: plugins/webhook
-    settings:
-      urls:
-        from_secret: webhook_url
-      content_type: application/json
-      template: '{"status":"failure","repo":"{{ repo.name }}","commit":"{{ build.commit }}","branch":"{{ build.branch }}","author":"{{ build.author }}","message":"{{ build.message }}"}'
-    when:
-      status:
-        - failure
-    failure: ignore
-
 volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
-
 ---
 kind: pipeline
 type: docker
 name: build-multi-arch
-
 steps:
   - name: build-and-push-multiarch
     image: docker:27-cli
@@ -87,20 +60,16 @@ steps:
         - tag
       ref:
         - refs/tags/v*
-
 volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
-
 depends_on:
   - build-and-push
-
 ---
 kind: pipeline
 type: docker
 name: development-build
-
 steps:
   - name: build-dev-image
     image: docker:27-cli
@@ -128,7 +97,6 @@ steps:
         - dev/*
       event:
         - push
-
 volumes:
   - name: dockersock
     host:
