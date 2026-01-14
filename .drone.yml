@@ -20,23 +20,22 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-    settings:
-      registry:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      username:
-        from_secret: gitea_username
-      password:
-        from_secret: gitea_token
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
-      - echo "$${password}" | docker login $${registry} -u "$${username}" --password-stdin
-      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker build -t $${repo}:latest -t $${repo}:${SHORT_SHA} .
-      - docker push $${repo}:latest
-      - docker push $${repo}:${SHORT_SHA}
+      - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
+      - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
+      - docker build -t $DOCKER_REPO:latest -t $DOCKER_REPO:$SHORT_SHA .
+      - docker push $DOCKER_REPO:latest
+      - docker push $DOCKER_REPO:$SHORT_SHA
     when:
       event:
         - push
@@ -72,22 +71,21 @@ steps:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
       DOCKER_CLI_EXPERIMENTAL: enabled
-    settings:
-      registry:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      username:
-        from_secret: gitea_username
-      password:
-        from_secret: gitea_token
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
-      - echo "$${password}" | docker login $${registry} -u "$${username}" --password-stdin
+      - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - docker buildx create --use --name multiarch-builder --driver docker-container || true
-      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $${repo}:latest -t $${repo}:${SHORT_SHA} --push .
+      - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
+      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_REPO:latest -t $DOCKER_REPO:$SHORT_SHA --push .
     when:
       event:
         - tag
@@ -120,23 +118,22 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-    settings:
-      registry:
+      GITEA_REGISTRY:
         from_secret: GITEA_REGISTRY
-      username:
-        from_secret: gitea_username
-      password:
-        from_secret: gitea_token
-      repo:
+      DOCKER_REPO:
         from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
-      - echo "$${password}" | docker login $${registry} -u "$${username}" --password-stdin
-      - export SHORT_SHA=$(echo ${DRONE_COMMIT_SHA} | cut -c1-8)
-      - docker build -t $${repo}:dev-${DRONE_BRANCH} -t $${repo}:dev-${SHORT_SHA} .
-      - docker push $${repo}:dev-${DRONE_BRANCH}
-      - docker push $${repo}:dev-${SHORT_SHA}
+      - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
+      - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
+      - docker build -t $DOCKER_REPO:dev-$DRONE_BRANCH -t $DOCKER_REPO:dev-$SHORT_SHA .
+      - docker push $DOCKER_REPO:dev-$DRONE_BRANCH
+      - docker push $DOCKER_REPO:dev-$SHORT_SHA
     when:
       branch:
         - develop
