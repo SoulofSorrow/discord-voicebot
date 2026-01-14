@@ -23,10 +23,14 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
-      DOCKER_REPO:   "from_secret: docker_repo"
-      GITEA_USER:    "from_secret: gitea_username"
-      GITEA_TOKEN:   "from_secret: gitea_token"
+      GITEA_REGISTRY:
+        from_secret: GITEA_REGISTRY
+      DOCKER_REPO:
+        from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
@@ -72,10 +76,14 @@ steps:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
       DOCKER_CLI_EXPERIMENTAL: enabled
-      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
-      DOCKER_REPO:   "from_secret: docker_repo"
-      GITEA_USER:    "from_secret: gitea_username"
-      GITEA_TOKEN:   "from_secret: gitea_token"
+      GITEA_REGISTRY:
+        from_secret: GITEA_REGISTRY
+      DOCKER_REPO:
+        from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
@@ -124,10 +132,14 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
-      DOCKER_REPO:   "from_secret: docker_repo"
-      GITEA_USER:    "from_secret: gitea_username"
-      GITEA_TOKEN:   "from_secret: gitea_token"
+      GITEA_REGISTRY:
+        from_secret: GITEA_REGISTRY
+      DOCKER_REPO:
+        from_secret: docker_repo
+      GITEA_USER:
+        from_secret: gitea_username
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - sleep 5
       - docker info
