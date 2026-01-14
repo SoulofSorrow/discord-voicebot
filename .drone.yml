@@ -7,7 +7,10 @@ services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
     command:
+      - "dockerd"
       - "--host=tcp://0.0.0.0:2375"
       - "--tls=false"
     volumes:
@@ -29,8 +32,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 10
-      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
+      - sleep 15
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 3; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
@@ -58,7 +61,10 @@ services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
     command:
+      - "dockerd"
       - "--host=tcp://0.0.0.0:2375"
       - "--tls=false"
     volumes:
@@ -81,8 +87,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 10
-      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
+      - sleep 15
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 3; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - docker buildx create --use --name multiarch-builder --driver docker-container || true
@@ -107,7 +113,10 @@ services:
   - name: docker
     image: docker:27-dind
     privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
     command:
+      - "dockerd"
       - "--host=tcp://0.0.0.0:2375"
       - "--tls=false"
     volumes:
@@ -129,8 +138,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 10
-      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
+      - sleep 15
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 3; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
