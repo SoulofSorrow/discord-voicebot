@@ -29,7 +29,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 5
+      - sleep 10
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
@@ -80,7 +81,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 5
+      - sleep 10
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - docker buildx create --use --name multiarch-builder --driver docker-container || true
@@ -127,7 +129,8 @@ steps:
       GITEA_TOKEN:
         from_secret: gitea_token
     commands:
-      - sleep 5
+      - sleep 10
+      - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 2; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
       - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
