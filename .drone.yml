@@ -1,6 +1,7 @@
 # ------------------------------------------------------------------
 # 1️⃣ build‑and‑push (single‑arch Docker image)
 # ------------------------------------------------------------------
+---
 kind: pipeline
 type: docker
 name: build-and-push
@@ -22,10 +23,10 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
-      DOCKER_REPO:   from_secret: docker_repo
-      GITEA_USER:    from_secret: gitea_username
-      GITEA_TOKEN:   from_secret: gitea_token
+      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
+      DOCKER_REPO:   "from_secret: docker_repo"
+      GITEA_USER:    "from_secret: gitea_username"
+      GITEA_TOKEN:   "from_secret: gitea_token"
     commands:
       - sleep 5
       - docker info
@@ -46,6 +47,7 @@ volumes:
 # ------------------------------------------------------------------
 # 2️⃣ build‑multi‑arch (multi‑arch image via buildx)
 # ------------------------------------------------------------------
+---
 kind: pipeline
 type: docker
 name: build-multi-arch
@@ -70,10 +72,10 @@ steps:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
       DOCKER_CLI_EXPERIMENTAL: enabled
-      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
-      DOCKER_REPO:   from_secret: docker_repo
-      GITEA_USER:    from_secret: gitea_username
-      GITEA_TOKEN:   from_secret: gitea_token
+      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
+      DOCKER_REPO:   "from_secret: docker_repo"
+      GITEA_USER:    "from_secret: gitea_username"
+      GITEA_TOKEN:   "from_secret: gitea_token"
     commands:
       - sleep 5
       - docker info
@@ -100,6 +102,7 @@ volumes:
 # ------------------------------------------------------------------
 # 3️⃣ development‑build (dev‑image für Branches)
 # ------------------------------------------------------------------
+---
 kind: pipeline
 type: docker
 name: development-build
@@ -121,10 +124,10 @@ steps:
     environment:
       DOCKER_HOST: tcp://docker:2375
       DOCKER_TLS_CERTDIR: ""
-      GITEA_REGISTRY: from_secret: GITEA_REGISTRY
-      DOCKER_REPO:   from_secret: docker_repo
-      GITEA_USER:    from_secret: gitea_username
-      GITEA_TOKEN:   from_secret: gitea_token
+      GITEA_REGISTRY: "from_secret: GITEA_REGISTRY"
+      DOCKER_REPO:   "from_secret: docker_repo"
+      GITEA_USER:    "from_secret: gitea_username"
+      GITEA_TOKEN:   "from_secret: gitea_token"
     commands:
       - sleep 5
       - docker info
