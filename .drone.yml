@@ -40,10 +40,6 @@ steps:
       - docker build -t $DOCKER_REPO:latest -t $DOCKER_REPO:$SHORT_SHA .
       - docker push $DOCKER_REPO:latest
       - docker push $DOCKER_REPO:$SHORT_SHA
-    when:
-      event:
-        - push
-        - tag
 
 volumes:
   - name: docker-storage
@@ -53,9 +49,6 @@ volumes:
 kind: pipeline
 type: docker
 name: build-multi-arch
-
-depends_on:
-  - build-and-push
 
 services:
   - name: docker
@@ -91,9 +84,9 @@ steps:
       - until docker info >/dev/null 2>&1; do echo "Waiting for docker daemon..."; sleep 3; done
       - docker info
       - echo "$GITEA_TOKEN" | docker login "$GITEA_REGISTRY" -u "$GITEA_USER" --password-stdin
-      - docker buildx create --use --name multiarch-builder --driver docker-container --driver-opt network=host || true
+      - docker buildx create --use --name multiarch-builder --driver docker-container || true
       - export SHORT_SHA=$(echo $DRONE_COMMIT_SHA | cut -c1-8)
-      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_REPO:latest -t $DOCKER_REPO:$SHORT_SHA --push .
+      - docker buildx build --platform linux/amd64,linux/arm64 --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_REPO:multiarch-latest -t $DOCKER_REPO:multiarch-$SHORT_SHA --push .
     when:
       event:
         - tag
