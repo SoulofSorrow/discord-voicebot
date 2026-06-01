@@ -1,5 +1,5 @@
 # Build stage - compile native modules
-FROM node:25-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install build dependencies for native modules (better-sqlite3)
 RUN apk add --no-cache \
