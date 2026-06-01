@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --production --ignore-scripts=false
 
 # Production stage - minimal runtime image
-FROM node:25-alpine
+FROM node:24-alpine
 
 # Install only runtime dependencies
 RUN apk add --no-cache wget
