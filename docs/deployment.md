@@ -39,8 +39,7 @@ dispatch.
 | `.github/workflows/ci.yml` | `ghcr.io` | PR builds `linux/amd64` only, GHA cache |
 
 Jobs: `verify-lockfile` -> `lint`, `test` -> `build-and-push` (no push for
-pull requests). Tags: branch, `pr-<n>`, semver `{{version}}` and
-`{{major}}.{{minor}}`, `sha-<short>`, `latest` on the default branch.
+pull requests). Tags: every pushed build gets `sha-<short>` (also pushes to `main`); a release tag `vX.Y.Z` additionally pushes `X.Y.Z` and `latest`; a prerelease tag pushes its version without `latest`; no branch or floating tags; pull requests build without pushing.
 
 ## Release
 
