@@ -31,6 +31,7 @@ Never rewrite an existing change file; add a new one.
 | File | Purpose |
 | --- | --- |
 | `docs/changes/2026-11-25-ai-ready-docs.md` | Adds `docs/`, `AGENTS.md`, `CLAUDE.md` and project skills |
+| `docs/changes/2026-11-26-registry-login-packages-token.md` | Registry login uses the shared `PACKAGES_TOKEN` |
 
 ## Maintenance rules
 
