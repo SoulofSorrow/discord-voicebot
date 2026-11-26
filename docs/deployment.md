@@ -2,8 +2,13 @@
 
 ## Docker image (`Dockerfile`)
 
-- Two stages on `node:24-alpine`. Builder installs `python3 make g++ gcc
-  libc-dev` and runs `npm ci --production` (compiles `better-sqlite3`).
+- Two stages on `node:24-alpine`. Builder (`--platform=$BUILDPLATFORM`) runs
+  `npm ci --omit=dev --os=linux --cpu=<target>` with `npm_config_arch`,
+  `npm_config_platform=linux`, `npm_config_libc=musl`: `better-sqlite3` gets
+  the target prebuild via `prebuild-install`, no compiler. The build fails if
+  `better_sqlite3.node` has the wrong ELF machine. `bufferutil` and
+  `utf-8-validate` have no linux-arm64 prebuild; on arm64 `ws` uses its
+  JavaScript fallback.
 - Runtime: `apk add wget` (health check), copies `node_modules` from the
   builder, creates `data/`, `logs/`, `public/`, then `COPY . .`.
 - `EXPOSE 3000 9090`, `USER node`, `CMD ["npm", "start"]` (runs `start.sh`,
@@ -28,7 +33,7 @@ authentication.
 
 ## CI
 
-Emulation: `docker/setup-qemu-action` is pinned to `tonistiigi/binfmt:qemu-v9.2.2`; with `latest` (QEMU 10) Node crashed with `Illegal instruction` in the arm64 build and the job hung. Job `build-and-push` has `timeout-minutes: 45`.
+Emulation: node/npm never run under QEMU. Every `npm` stage of the `Dockerfile` uses `FROM --platform=$BUILDPLATFORM`; only the runtime stage is built for the target platform. Under emulation Node crashed with `Illegal instruction` in the arm64 build and the job hung, with QEMU 10 and with the pinned `tonistiigi/binfmt:qemu-v9.2.2` (pin kept). Job `build-and-push` has `timeout-minutes: 45`.
 
 Triggered on push to `main`, tags `v*.*.*`, pull requests to `main`, manual
 dispatch.
