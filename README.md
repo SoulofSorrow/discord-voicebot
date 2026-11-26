@@ -356,6 +356,11 @@ We welcome contributions! Please follow these steps:
 - Test your changes thoroughly
 - Update documentation as needed
 
+## Documentation
+
+Detailed, agent-oriented documentation lives in [docs/](docs/README.md).
+Instructions for AI coding agents: [AGENTS.md](AGENTS.md).
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
