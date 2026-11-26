@@ -33,6 +33,7 @@ Never rewrite an existing change file; add a new one.
 | `docs/changes/2026-11-25-ai-ready-docs.md` | Adds `docs/`, `AGENTS.md`, `CLAUDE.md` and project skills |
 | `docs/changes/2026-11-26-registry-login-packages-token.md` | Registry login uses the shared `PACKAGES_TOKEN` |
 | `docs/changes/2026-11-26-pin-qemu-and-build-timeout.md` | QEMU pinned to 9.2.2, build job timeout |
+| `docs/changes/2026-11-26-standard-image-build-and-tags.md` | Standard image build job; `latest` and version only from releases, otherwise `sha-<short>` |
 
 ## Maintenance rules
 
