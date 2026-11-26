@@ -56,3 +56,6 @@ docker-compose.yml
 .env
 .env.*
 !.env.example
+
+# Agent tooling
+.claude/
